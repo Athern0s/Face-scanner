@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>FaceScan AI - Analisis Wajah & Kulit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #0a0f2a 0%, #1a1f3a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 12px 28px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFD89B, #C7E9FB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badge-ai {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+        }
+
+        .main-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 28px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102,126,234,0.1);
+            transform: scale(1.01);
+        }
+
+        .upload-area.drag-over {
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.1);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .camera-option {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-camera {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-camera:hover {
+            background: rgba(102,126,234,0.4);
+            border-color: #667eea;
+        }
+
+        .preview-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+        }
+
+        .image-box {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .image-box h3 {
+            color: white;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .image-box canvas, .image-box img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: #1a1f3a;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(102,126,234,0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .analysis-result {
+            margin-top: 30px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 24px;
+            padding: 25px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .confidence-badge {
+            background: rgba(0,255,136,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #00ff88;
+        }
+
+        /* Tabs untuk navigasi hasil analisis */
+        .result-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 18px;
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .metric-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .metric-name {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 6px;
+        }
+
+        .metric-desc {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .status-good { color: #00ff88; }
+        .status-warning { color: #ffb347; }
+        .status-bad { color: #ff6b6b; }
+
+        /* Face Shape Cards */
+        .face-shape-card {
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2));
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .face-shape-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .face-shape-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .face-shape-desc {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Proportional Analysis */
+        .proportional-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .prop-item {
+            background: rgba(0,0,0,0.25);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .prop-name {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 5px;
+        }
+
+        .prop-ratio {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .prop-status {
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
+
+        .issues-section {
+            background: rgba(0,0,0,0.25);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .issues-title {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .issues-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .issue-tag {
+            background: rgba(255,107,107,0.2);
+            border: 1px solid rgba(255,107,107,0.4);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: #ff6b6b;
+        }
+
+        .issue-tag.mild { background: rgba(255,180,71,0.2); border-color: rgba(255,180,71,0.4); color: #ffb347; }
+        .issue-tag.none { background: rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.3); color: #00ff88; }
+
+        .rec-section {
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2));
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .rec-title {
+            font-size: 0.9rem;
+            color: white;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rec-list {
+            list-style: none;
+        }
+
+        .rec-list li {
+            padding: 8px 0;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .rec-list li:last-child {
+            border-bottom: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .camera-container {
+            background: #000;
+            border-radius: 32px;
+            overflow: hidden;
+            max-width: 90%;
+            max-height: 80%;
+        }
+
+        video {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: cover;
+        }
+
+        .camera-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .close-camera {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .main-card { padding: 20px; }
+            .header h1 { font-size: 1.5rem; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .proportional-grid { grid-template-columns: 1fr; }
+            .result-tabs { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span class="logo-icon">🔍</span>
+                <span class="logo-text">FaceScan AI</span>
+                <span class="badge-ai">Powered by AI</span>
+            </div>
+            <h1>✨ Scan Wajah + Struktur Proporsional ✨</h1>
+            <p>Analisis kulit, bentuk wajah, dan proporsi ideal ala Depuff AI</p>
+        </div>
+
+        <div class="main-card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">Upload Foto Wajah</div>
+                <div class="upload-subtext">Klik atau drag & drop foto disini (JPG, PNG)</div>
+                <input type="file" id="imageInput" accept="image/jpeg,image/png,image/jpg">
+            </div>
+
+            <div class="camera-option">
+                <button class="btn-camera" id="cameraBtn">
+                    📷 Buka Kamera
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>🔄 Sedang menganalisis wajah, kulit, dan struktur...</p>
+                <p style="font-size:0.8rem; margin-top:8px;">AI sedang menghitung proporsi wajah</p>
+            </div>
+
+            <div class="preview-section" id="previewSection">
+                <div class="preview-container">
+                    <div class="image-box">
+                        <h3>📷 Foto Anda</h3>
+                        <img id="originalImage" alt="Foto wajah">
+                    </div>
+                    <div class="image-box">
+                        <h3>🔍 Hasil Scan AI</h3>
+                        <canvas id="analysisCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="analysis-result" id="analysisResult">
+                    <div class="result-header">
+                        <div class="result-title">
+                            📊 Hasil Analisis Lengkap
+                            <span class="confidence-badge" id="confidenceBadge">Akurasi: --</span>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="result-tabs">
+                        <button class="tab-btn active" data-tab="kulit">✨ Analisis Kulit</button>
+                        <button class="tab-btn" data-tab="struktur">👤 Struktur Wajah</button>
+                        <button class="tab-btn" data-tab="proporsi">📐 Proporsi Ideal</button>
+                        <button class="tab-btn" data-tab="rekomendasi">💡 Rekomendasi</button>
+                    </div>
+
+                    <!-- Tab Kulit -->
+                    <div class="tab-content active" id="tab-kulit">
+                        <div id="metricsContainer" class="metrics-grid"></div>
+                        <div id="issuesContainer" class="issues-section" style="display:none;"></div>
+                    </div>
+
+                    <!-- Tab Struktur Wajah (Bentuk Wajah) -->
+                    <div class="tab-content" id="tab-struktur">
+                        <div id="faceShapeContainer" class="face-shape-card"></div>
+                        <div id="facialFeaturesContainer" class="metrics-grid"></div>
+                    </div>
+
+                    <!-- Tab Proporsi Ideal -->
+                    <div class="tab-content" id="tab-proporsi">
+                        <div id="proportionalContainer" class="proportional-grid"></div>
+                        <div id="goldenRatioContainer" class="face-shape-card" style="margin-top:15px;"></div>
+                    </div>
+
+                    <!-- Tab Rekomendasi -->
+                    <div class="tab-content" id="tab-rekomendasi">
+                        <div id="recommendationsContainer" class="rec-section"></div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="resetBtn">📁 Upload Ulang</button>
+                        <button class="btn btn-primary" id="downloadBtn">💾 Download Hasil Scan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="camera-modal" id="cameraModal">
+        <button class="close-camera" id="closeCameraBtn">✕</button>
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+        </div>
+        <div class="camera-controls">
+            <button class="btn btn-primary" id="captureBtn">📸 Ambil Foto</button>
+            <button class="btn btn-secondary" id="switchCameraBtn">🔄 Ganti Kamera</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.15.0/dist/tf-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.15.0/dist/tf-converter.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-detection@1.0.2/dist/face-detection.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
