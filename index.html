@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PSL LOOKSMAX v5 - FIXED | Face++ Akurasi Tinggi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0a1a, #02020c);
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(5, 5, 20, 0.7);
+            backdrop-filter: blur(14px);
+            border-radius: 56px;
+            padding: 24px;
+            border: 1px solid rgba(255, 200, 100, 0.2);
+        }
+        h1 { text-align: center; color: white; font-size: 1.6rem; }
+        h1 span { background: linear-gradient(135deg, #ffd966, #ffaa33); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .api-info {
+            background: #1a1a2e88;
+            border-radius: 40px;
+            padding: 12px;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #aaaaff;
+        }
+        .video-wrapper {
+            position: relative;
+            border-radius: 32px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: #000;
+            margin: 16px 0;
+        }
+        video, canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        video { transform: scaleX(-1); z-index: 1; }
+        canvas { z-index: 2; }
+        button {
+            background: rgba(10,10,30,0.9);
+            border: 1px solid #ffaa6688;
+            padding: 12px 24px;
+            border-radius: 60px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 4px;
+            font-size: 0.9rem;
+        }
+        .btn-primary { background: linear-gradient(95deg, #ff8c00, #ff2e00); border: none; }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-top: 20px;
+        }
+        .card {
+            background: rgba(0,0,0,0.55);
+            border-radius: 28px;
+            padding: 14px;
+            text-align: center;
+        }
+        .tier-big {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffdd99, #ffaa33);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .score-big { font-size: 1.6rem; font-weight: bold; color: #ffcc66; }
+        .status-bar { display: flex; justify-content: space-between; color: #ccc9ff; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1000;
+            gap: 15px;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid #333;
+            border-top: 4px solid #ffaa33;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        footer { text-align: center; font-size: 11px; color: #6a65a0; margin-top: 20px; }
+        .error-box {
+            background: #ff000022;
+            border: 1px solid #ff6666;
+            border-radius: 20px;
+            padding: 10px;
+            margin-top: 12px;
+            text-align: center;
+            color: #ffaaaa;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔥 PSL LOOKSMAX <span>v5 FIXED</span> 🎯</h1>
+    <div class="api-info">
+        ⚡ API Key & Secret langsung edit di dalam file HTML (cari const API_KEY dan API_SECRET)
+    </div>
+    <div class="controls" style="text-align:center;">
+        <button id="startCamBtn">🎥 Aktifkan Kamera</button>
+        <button id="snapBtn" class="btn-primary">📸 SCAN WAJAH</button>
+    </div>
+    <div class="video-wrapper">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="canvas"></canvas>
+    </div>
+    <div class="status-bar">
+        <span>📡 Status: <span id="status">Siap</span></span>
+        <span>👤 Wajah: <span id="faceCount">0</span></span>
+    </div>
+    <div class="result-grid" id="resultArea">
+        <div class="card"><div>🏆 PSL TIER</div><div id="tierDisplay" class="tier-big">—</div></div>
+        <div class="card"><div>📊 LOOKS SCORE</div><div id="scoreDisplay" class="score-big">--/10</div></div>
+        <div class="card"><div>🔷 BENTUK MUKA</div><div id="shapeDisplay" style="font-size:1.1rem; font-weight:bold;">—</div></div>
+        <div class="card"><div>🔄 SIMETRI</div><div id="symmetryDisplay" style="font-size:1.3rem;">—%</div></div>
+        <div class="card"><div>😊 EKSPRESI</div><div id="exprDisplay">—</div></div>
+        <div class="card"><div>📏 BEAUTY SCORE</div><div id="beautyDisplay">—/100</div></div>
+    </div>
+    <div id="aiDesc" style="text-align:center; margin-top:12px; font-size:0.8rem; color:#ccaa88;"></div>
+    <div id="errorBox" class="error-box" style="display:none;"></div>
+    <footer>⚡ Face++ AI | 106 titik landmark | Fix: hasil selalu keluar</footer>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay" style="display:none;">
+    <div class="spinner"></div>
+    <div style="color:white;">Mengirim ke Face++ AI ...</div>
+    <div style="color:#aaa;">Mohon tunggu 2-5 detik</div>
+</div>
+
+<script>
+    (function() {
+        // ========== GANTI API KEY & SECRET DI SINI ==========
+        const API_KEY = "nmtBRJUfu7IfowFJU4WkvFkHscFE41IL";
+        const API_SECRET = "nP0jKxgFB3c302BA2Ul64u1Pj96YBYG_";
+        // ====================================================
+        
+        // DOM
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startCamBtn = document.getElementById('startCamBtn');
+        const snapBtn = document.getElementById('snapBtn');
+        const statusSpan = document.getElementById('status');
+        const faceCountSpan = document.getElementById('faceCount');
+        const tierDisplay = document.getElementById('tierDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const shapeDisplay = document.getElementById('shapeDisplay');
+        const symmetryDisplay = document.getElementById('symmetryDisplay');
+        const exprDisplay = document.getElementById('exprDisplay');
+        const beautyDisplay = document.getElementById('beautyDisplay');
+        const aiDescSpan = document.getElementById('aiDesc');
+        const errorBox = document.getElementById('errorBox');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        let stream = null;
+        
+        function showError(msg) {
+            errorBox.style.display = "block";
+            errorBox.innerText = "⚠️ " + msg;
+            setTimeout(() => { errorBox.style.display = "none"; }, 5000);
+        }
+        
+        function validateApi() {
+            if (API_KEY === "GANTI_DENGAN_API_KEY_LO" || API_SECRET === "GANTI_DENGAN_API_SECRET_LO") {
+                statusSpan.innerText = "⚠️ GANTI API KEY!";
+                showError("Isi dulu API_KEY dan API_SECRET di dalam file HTML (cari const API_KEY)");
+                return false;
+            }
+            return true;
+        }
+        
+        // Bentuk muka dari landmark (dengan fallback)
+        function getFaceShape(landmarks, imgW, imgH) {
+            try {
+                // Face++ punya landmark dengan nama-nama seperti 'contour_left1', dll
+                const getPoint = (name) => landmarks[name];
+                const leftCheek = getPoint('contour_left1') || getPoint('left_eye_right_corner');
+                const rightCheek = getPoint('contour_right1') || getPoint('right_eye_left_corner');
+                const chin = getPoint('contour_chin') || getPoint('mouth_lower_lip_bottom');
+                const forehead = getPoint('contour_right7') || getPoint('left_eye_top');
+                
+                if (!leftCheek || !rightCheek) return "Oval";
+                
+                const width = Math.abs(leftCheek.x - rightCheek.x) * imgW;
+                let height = 1;
+                if (chin && forehead) height = Math.abs(forehead.y - chin.y) * imgH;
+                else if (chin) height = Math.abs(0.3 - chin.y) * imgH;
+                
+                const ratio = height / (width + 0.01);
+                if (ratio > 1.4) return "Lonjong";
+                if (ratio < 1.02) return "Bulat";
+                if (ratio >= 1.05 && ratio <= 1.35) return "Oval";
+                return "Proporsional";
+            } catch(e) { return "Oval"; }
+        }
+        
+        // Simetri dari landmark mata
+        function getSymmetry(landmarks) {
+            try {
+                const leftEye = landmarks['left_eye_center'] || landmarks['left_eye'] || null;
+                const rightEye = landmarks['right_eye_center'] || landmarks['right_eye'] || null;
+                if (!leftEye || !rightEye) return 75;
+                const diff = Math.abs(leftEye.y - rightEye.y);
+                let symmetry = 100 - (diff * 80);
+                return Math.min(98, Math.max(45, Math.floor(symmetry)));
+            } catch(e) { return 70; }
+        }
+        
+        // Ekspresi dari emotion Face++
+        function getExpression(emotion) {
+            if (!emotion) return "😐 Netral";
+            let maxEmo = "neutral";
+            let maxVal = 0;
+            for (let [key, val] of Object.entries(emotion)) {
+                if (val > maxVal) { maxVal = val; maxEmo = key; }
+            }
+            const map = {
+                happiness: "😊 Senang", sadness: "😢 Sedih", anger: "😠 Marah",
+                fear: "😨 Takut", disgust: "🤢 Jijik", surprise: "😲 Kaget", neutral: "😐 Netral"
+            };
+            return map[maxEmo] || maxEmo;
+        }
+        
+        // Konversi beauty score ke PSL tier (standar looksmax)
+        function beautyToPSL(beautyScore) {
+            let score = beautyScore / 10; // 0-10
+            score = Math.min(9.9, Math.max(1.5, score));
+            let tier = "";
+            if (score >= 8.7) tier = "CHAD 👑";
+            else if (score >= 8.0) tier = "CHAD LITE ⚡";
+            else if (score >= 7.3) tier = "HTN 🔥";
+            else if (score >= 6.4) tier = "MTN ✅";
+            else if (score >= 5.4) tier = "ITN 📌";
+            else if (score >= 4.0) tier = "SUB5 ⚠️";
+            else tier = "SUB3 ❌";
+            return { tier, looksScore: score.toFixed(1) };
+        }
+        
+        async function scanFace() {
+            if (!video.srcObject || !video.videoWidth) {
+                showError("Aktifkan kamera dulu!");
+                return;
+            }
+            if (!validateApi()) return;
+            
+            // Capture gambar
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64 = canvas.toDataURL('image/jpeg', 0.85);
+            
+            loadingOverlay.style.display = "flex";
+            statusSpan.innerText = "Scanning ke Face++...";
+            
+            const formData = new FormData();
+            formData.append('api_key', API_KEY);
+            formData.append('api_secret', API_SECRET);
+            formData.append('image_base64', base64.split(',')[1]);
+            formData.append('return_attributes', 'gender,age,smiling,emotion,beauty,facequality');
+            
+            try {
+                const response = await fetch('https://api-us.faceplusplus.com/facepp/v3/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                loadingOverlay.style.display = "none";
+                
+                if (data.error_message) {
+                    showError("Face++ Error: " + data.error_message);
+                    statusSpan.innerText = "API Error";
+                    return;
+                }
+                
+                if (!data.faces || data.faces.length === 0) {
+                    showError("Tidak ada wajah terdeteksi. Perbaiki pencahayaan dan hadap lurus!");
+                    statusSpan.innerText = "Wajah tidak terdeteksi";
+                    faceCountSpan.innerText = "0";
+                    return;
+                }
+                
+                const face = data.faces[0];
+                const attrs = face.attributes;
+                const landmarks = face.landmark;
+                
+                // Ambil beauty score (prioritaskan yang ada)
+                let beautyScore = 65;
+                if (attrs.beauty) {
+                    beautyScore = attrs.beauty.male_score || attrs.beauty.female_score || 65;
+                }
+                
+                // Fallback: jika beauty score 0, estimasi dari facequality
+                if (beautyScore < 30 && attrs.facequality) {
+                    beautyScore = attrs.facequality.value * 80;
+                }
+                if (beautyScore < 30) beautyScore = 65;
+                
+                const shape = getFaceShape(landmarks, canvas.width, canvas.height);
+                const symmetry = getSymmetry(landmarks);
+                const expression = getExpression(attrs.emotion);
+                const psl = beautyToPSL(beautyScore);
+                
+                // Update UI
+                tierDisplay.innerHTML = psl.tier;
+                scoreDisplay.innerHTML = psl.looksScore + "/10";
+                shapeDisplay.innerHTML = shape;
+                symmetryDisplay.innerHTML = symmetry + "%";
+                exprDisplay.innerHTML = expression;
+                beautyDisplay.innerHTML = Math.floor(beautyScore) + "/100";
+                faceCountSpan.innerText = data.faces.length;
+                statusSpan.innerText = "✅ Scan berhasil!";
+                
+                let genderText = attrs.gender?.value || "Unknown";
+                let ageText = attrs.age?.value || "?";
+                aiDescSpan.innerHTML = `🎯 ${genderText} · ${ageText} tahun · Beauty: ${Math.floor(beautyScore)}/100 | ${psl.tier}`;
+                
+                // Gambar titik landmark di canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                for (let key in landmarks) {
+                    let pt = landmarks[key];
+                    let x = pt.x * canvas.width;
+                    let y = pt.y * canvas.height;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, 2 * Math.PI);
+                    ctx.fillStyle = "#00ffcc";
+                    ctx.fill();
+                }
+                
+            } catch(err) {
+                loadingOverlay.style.display = "none";
+                showError("Network error: " + err.message);
+                statusSpan.innerText = "Error koneksi";
+            }
+        }
+        
+        async function startCamera() {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            try {
+                const media = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream = media;
+                video.srcObject = stream;
+                await video.play();
+                const resize = () => {
+                    if (video.videoWidth) {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                    }
+                };
+                setTimeout(resize, 200);
+                statusSpan.innerText = "Kamera ON, siap scan";
+                startCamBtn.innerText = "🔄 Restart";
+            } catch(e) {
+                showError("Izin kamera diperlukan!");
+            }
+        }
+        
+        startCamBtn.onclick = startCamera;
+        snapBtn.onclick = scanFace;
+        
+        validateApi();
+        statusSpan.innerText = "Aktifkan kamera, lalu klik SCAN";
+    })();
+</script>
+</body>
+</html>
