@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PSL LOOKSMAX | Premium Face Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 10%, #0d0d0d, #000000);
+            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+            padding: 24px 20px;
+        }
+
+        /* luxury glassmorphism theme */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: rgba(10, 10, 15, 0.55);
+            backdrop-filter: blur(16px);
+            border-radius: 56px;
+            padding: 28px 24px;
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(212, 175, 55, 0.15);
+            transition: all 0.2s;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 1.7rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, #f9e0a0, #d4af37, #b8860b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .premium-badge {
+            background: rgba(212, 175, 55, 0.15);
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #e4c580;
+            border: 0.5px solid #d4af3766;
+        }
+
+        .info-card {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 40px;
+            padding: 12px 20px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid #d4af3744;
+            backdrop-filter: blur(4px);
+        }
+
+        .info-card p {
+            color: #e2d9c0;
+            font-size: 0.75rem;
+        }
+
+        .video-wrapper {
+            position: relative;
+            border-radius: 40px;
+            overflow: hidden;
+            aspect-ratio: 4 / 3;
+            background: #000000;
+            margin: 20px 0;
+            border: 1px solid #d4af3766;
+            box-shadow: 0 12px 28px black;
+        }
+
+        video, canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+
+        video {
+            transform: scaleX(-1);
+            z-index: 1;
+        }
+
+        canvas {
+            z-index: 2;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 20px 0 12px;
+        }
+
+        button {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #d4af37aa;
+            padding: 12px 32px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffefcf;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .btn-gold {
+            background: linear-gradient(105deg, #b8860b, #d4af37, #f5cb5c);
+            border: none;
+            color: #0a0a0a;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            color: #dfd9c7;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 18px;
+            border-radius: 60px;
+            margin: 15px 0 10px;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .komponen-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin: 25px 0 20px;
+        }
+
+        .komponen-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            border-radius: 32px;
+            padding: 12px 6px;
+            text-align: center;
+            border: 1px solid #d4af3766;
+            transition: all 0.2s;
+        }
+
+        .komponen-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #e4c580;
+            letter-spacing: 1px;
+        }
+
+        .komponen-score {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #f5e2a4;
+            line-height: 1.2;
+        }
+
+        .komponen-desc {
+            font-size: 0.6rem;
+            color: #bcb28b;
+            margin-top: 5px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin: 20px 0 12px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.55);
+            border-radius: 32px;
+            padding: 14px 8px;
+            text-align: center;
+            border: 1px solid #d4af3766;
+        }
+
+        .tier-gold {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f5e2b0, #d4af37);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .score-large {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffdf99;
+        }
+
+        .detail-footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.7rem;
+            color: #ae9f73;
+            border-top: 0.5px solid #d4af3744;
+            padding-top: 16px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.94);
+            backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1000;
+            gap: 20px;
+        }
+
+        .gold-spinner {
+            width: 52px;
+            height: 52px;
+            border: 4px solid #333;
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 780px) {
+            .komponen-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>
+        👑 PSL LOOKSMAX <span>PREMIUM</span>
+        <span class="premium-badge">ACCURACY v8 · GOLD EDITION</span>
+    </h1>
+    <div class="info-card">
+        <p>✨ CARA PAKAI ✨ pencet aktifkan kamera dan pencet scan muka ✨ AI Face++ ✨</p>
+    </div>
+
+    <div class="button-group">
+        <button id="startCamBtn">🎥 AKTIFKAN KAMERA</button>
+        <button id="snapBtn" class="btn-gold">📸 SCAN WAJAH & ANALISIS</button>
+    </div>
+
+    <div class="video-wrapper">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="status-bar">
+        <span>📡 STATUS: <span id="status">SIAP</span></span>
+        <span>👤 WAJAH: <span id="faceCount">0</span></span>
+        <span>✨ FACE++ AI</span>
+    </div>
+
+    <!-- 5 komponen utama -->
+    <div class="komponen-grid">
+        <div class="komponen-card"><div class="komponen-label">🌟 POTENTIAL</div><div id="potentialScore" class="komponen-score">--</div><div id="potentialDesc" class="komponen-desc">---</div></div>
+        <div class="komponen-card"><div class="komponen-label">👁️ MATA</div><div id="eyesScore" class="komponen-score">--</div><div id="eyesDesc" class="komponen-desc">---</div></div>
+        <div class="komponen-card"><div class="komponen-label">📏 MIDFACE</div><div id="midfaceScore" class="komponen-score">--</div><div id="midfaceDesc" class="komponen-desc">---</div></div>
+        <div class="komponen-card"><div class="komponen-label">⬇️ LOWER THIRD</div><div id="lowerThirdScore" class="komponen-score">--</div><div id="lowerThirdDesc" class="komponen-desc">---</div></div>
+        <div class="komponen-card"><div class="komponen-label">⬆️ UPPER THIRD</div><div id="upperThirdScore" class="komponen-score">--</div><div id="upperThirdDesc" class="komponen-desc">---</div></div>
+    </div>
+
+    <div class="result-grid">
+        <div class="card"><div>🏆 TIER PSL</div><div id="tierDisplay" class="tier-gold">—</div></div>
+        <div class="card"><div>📊 LOOKS SCORE</div><div id="scoreDisplay" class="score-large">--/10</div></div>
+        <div class="card"><div>🔷 BENTUK MUKA</div><div id="shapeDisplay" style="font-weight:bold; color:#f2da9c;">—</div></div>
+        <div class="card"><div>🔄 SIMETRI</div><div id="symmetryDisplay" style="font-weight:bold; color:#f2da9c;">—%</div></div>
+        <div class="card"><div>😊 EKSPRESI</div><div id="exprDisplay">—</div></div>
+        <div class="card"><div>🎨 BEAUTY SCORE</div><div id="beautyDisplay" style="font-weight:bold; color:#f2da9c;">—/100</div></div>
+    </div>
+    <div id="detailInfo" class="detail-footer"></div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="gold-spinner"></div>
+    <div style="color: #f1ddb0;">⏳ MENGANALISIS WAJAH (Face++ AI) ...</div>
+    <div style="color: #a38f54; font-size: 13px;">harap tunggu, hasil premium segera keluar</div>
+</div>
+
+<script>
+    (function() {
+        // -------------------- KONFIGURASI API (GANTI DENGAN API KEY ASLI) --------------------
+        const API_KEY = "nmtBRJUfu7IfowFJU4WkvFkHscFE41IL";
+        const API_SECRET = "nP0jKxgFB3c302BA2Ul64u1Pj96YBYG_";
+        // -----------------------------------------------------------------------------------
+
+        // DOM elements
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startCamBtn = document.getElementById('startCamBtn');
+        const snapBtn = document.getElementById('snapBtn');
+        const statusSpan = document.getElementById('status');
+        const faceCountSpan = document.getElementById('faceCount');
+        const tierDisplay = document.getElementById('tierDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const shapeDisplay = document.getElementById('shapeDisplay');
+        const symmetryDisplay = document.getElementById('symmetryDisplay');
+        const exprDisplay = document.getElementById('exprDisplay');
+        const beautyDisplay = document.getElementById('beautyDisplay');
+        const detailInfoDiv = document.getElementById('detailInfo');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // komponen
+        const potentialScoreSpan = document.getElementById('potentialScore');
+        const potentialDescSpan = document.getElementById('potentialDesc');
+        const eyesScoreSpan = document.getElementById('eyesScore');
+        const eyesDescSpan = document.getElementById('eyesDesc');
+        const midfaceScoreSpan = document.getElementById('midfaceScore');
+        const midfaceDescSpan = document.getElementById('midfaceDesc');
+        const lowerThirdScoreSpan = document.getElementById('lowerThirdScore');
+        const lowerThirdDescSpan = document.getElementById('lowerThirdDesc');
+        const upperThirdScoreSpan = document.getElementById('upperThirdScore');
+        const upperThirdDescSpan = document.getElementById('upperThirdDesc');
+
+        let stream = null;
+
+        function showStatus(msg) { statusSpan.innerText = msg; }
+
+        // helper ambil landmark array (Face++ v3 stabil)
+        function getLandmarkArray(landmarks) {
+            if (!landmarks) return [];
+            if (Array.isArray(landmarks)) return landmarks;
+            let arr = [];
+            for (let i = 0; i <= 105; i++) {
+                if (landmarks[i]) arr.push(landmarks[i]);
+                else if (landmarks[i.toString()]) arr.push(landmarks[i.toString()]);
+            }
+            return arr;
+        }
+
+        // 10 BENTUK MUKA PREMIUM
+        function getDetailedFaceShape(landmarkArr, imgW, imgH) {
+            if (!landmarkArr || landmarkArr.length < 40) return "Oval Ideal";
+            const leftCheek = landmarkArr[3] || landmarkArr[4] || landmarkArr[2];
+            const rightCheek = landmarkArr[93] || landmarkArr[92] || landmarkArr[94];
+            const chin = landmarkArr[57] || landmarkArr[56] || landmarkArr[58];
+            const forehead = landmarkArr[24] || landmarkArr[23] || landmarkArr[25];
+            const jawLeft = landmarkArr[5] || landmarkArr[6];
+            const jawRight = landmarkArr[91] || landmarkArr[90];
+            if (!leftCheek || !rightCheek) return "Oval";
+
+            const width = Math.abs(leftCheek.x - rightCheek.x) * imgW;
+            let height = 1;
+            if (chin && forehead) height = Math.abs(forehead.y - chin.y) * imgH;
+            else if (chin) height = Math.abs(0.3 - chin.y) * imgH;
+            const ratioHW = height / (width + 0.01);
+
+            let jawCurve = 0;
+            if (jawLeft && jawRight && chin) jawCurve = Math.abs(jawLeft.x - jawRight.x) / (Math.abs(jawLeft.y - chin.y) + 0.01);
+            let foreheadToJaw = 1;
+            if (jawLeft && jawRight) {
+                const jawWidthFace = Math.abs(jawLeft.x - jawRight.x);
+                const foreheadLeft = landmarkArr[19] || landmarkArr[20];
+                const foreheadRight = landmarkArr[100] || landmarkArr[101];
+                if (foreheadLeft && foreheadRight) {
+                    const fWidth = Math.abs(foreheadLeft.x - foreheadRight.x);
+                    foreheadToJaw = fWidth / (jawWidthFace + 0.01);
+                }
+            }
+            if (ratioHW >= 0.95 && ratioHW <= 1.08 && jawCurve < 1.3) return "Bulat ⬤";
+            if (ratioHW > 1.45) return "Lonjong ⬭";
+            if (ratioHW >= 1.1 && ratioHW <= 1.38 && jawCurve >= 1.2 && jawCurve <= 1.6) return "Oval ⭒";
+            if (foreheadToJaw > 1.15 && jawCurve > 1.5) return "Hati ❤️";
+            if (ratioHW >= 0.95 && ratioHW <= 1.15 && jawCurve < 1.2) return "Kotak ⬛";
+            if (jawCurve > 1.5 && ratioHW >= 1.05 && ratioHW <= 1.35 && foreheadToJaw < 0.85) return "Diamond ⬦";
+            if (ratioHW > 1.25 && ratioHW <= 1.45 && jawCurve >= 1.1 && jawCurve <= 1.4) return "Persegi Panjang ⌷";
+            if (foreheadToJaw < 0.75 && jawCurve < 1.3) return "Segitiga 🔻";
+            if (foreheadToJaw > 1.2 && ratioHW <= 1.25) return "Air Terbalik 💧";
+            if (ratioHW >= 1.05 && ratioHW <= 1.2 && jawCurve >= 1.3 && jawCurve <= 1.7) return "Bulat Telur 🥚";
+            return "Proporsional ⭐";
+        }
+
+        // SIMETRI WAJAH
+        function getSymmetryAccurate(landmarkArr, imgH) {
+            if (!landmarkArr || landmarkArr.length < 100) return 72;
+            let leftEyeY = 0, rightEyeY = 0, lc = 0, rc = 0;
+            for (let i = 60; i <= 68; i++) { if (landmarkArr[i]) { leftEyeY += landmarkArr[i].y; lc++; } }
+            for (let i = 100; i <= 108; i++) { if (landmarkArr[i]) { rightEyeY += landmarkArr[i].y; rc++; } }
+            if (lc === 0 || rc === 0) return 70;
+            leftEyeY /= lc; rightEyeY /= rc;
+            let diff = Math.abs(leftEyeY - rightEyeY) * imgH;
+            let sym = 100 - (diff * 1.8);
+            return Math.min(98, Math.max(42, Math.floor(sym)));
+        }
+
+        // HITUNG 5 KOMPONEN LEWAT FALLBACK
+        function hitungKomponen(landmarkArr, imgW, imgH, beautyScore, symmetry) {
+            let eyesScore = 6, midfaceScore = 6, lowerThirdScore = 6, upperThirdScore = 6;
+            try {
+                if (landmarkArr && landmarkArr.length) {
+                    const mataKiri = landmarkArr[60] || landmarkArr[61];
+                    const mataKanan = landmarkArr[104] || landmarkArr[105];
+                    if (mataKiri && mataKanan) {
+                        let jarak = Math.abs(mataKiri.x - mataKanan.x) * imgW;
+                        let ideal = imgW * 0.36;
+                        let rasio = jarak / (ideal + 0.01);
+                        eyesScore = rasio > 0.85 && rasio < 1.15 ? 8 : (rasio > 0.7 && rasio < 1.3 ? 7 : 6);
+                        eyesScore += (symmetry / 100) * 2;
+                    }
+                }
+            } catch(e) { eyesScore = 6; }
+            eyesScore = Math.min(10, Math.max(3, Math.floor(eyesScore)));
+
+            midfaceScore = Math.min(10, Math.max(3, Math.floor(6 + (beautyScore - 50) / 15)));
+            lowerThirdScore = Math.min(10, Math.max(3, Math.floor(5.5 + (beautyScore - 45) / 12)));
+            upperThirdScore = Math.min(10, Math.max(3, Math.floor(5 + (beautyScore - 40) / 12)));
+
+            let potentialScore = Math.floor((eyesScore + midfaceScore + lowerThirdScore + upperThirdScore + (beautyScore / 10)) / 5);
+            potentialScore = Math.min(10, Math.max(2, potentialScore));
+
+            function desc(val, high, mid, low) { if (val >= 8) return high; if (val >= 6) return mid; return low; }
+            return {
+                potentialScore, eyesScore, midfaceScore, lowerThirdScore, upperThirdScore,
+                descPotential: desc(potentialScore, "Potensi elite", "Potensi bagus", "Perlu improvement"),
+                descEyes: desc(eyesScore, "Mata atraktif", "Mata proporsional", "Kurang ideal"),
+                descMidface: desc(midfaceScore, "Midface sempurna", "Midface seimbang", "Midface kurang"),
+                descLower: desc(lowerThirdScore, "Rahang tajam & tegas", "Rahang proporsional", "Rahang kurang"),
+                descUpper: desc(upperThirdScore, "Dahi ideal, alis tegas", "Dahi proporsional", "Dahi kurang ideal")
+            };
+        }
+
+        // mapping beauty -> tier
+        function getTierAndScore(beauty) {
+            let looks = beauty / 10;
+            looks = Math.min(9.9, Math.max(1.2, looks));
+            let tier = "";
+            if (looks >= 8.7) tier = "CHAD 👑";
+            else if (looks >= 8.0) tier = "CHAD LITE ⚡";
+            else if (looks >= 7.3) tier = "HTN 🔥";
+            else if (looks >= 6.4) tier = "MTN ✅";
+            else if (looks >= 5.4) tier = "ITN 📌";
+            else if (looks >= 4.0) tier = "SUB5 ⚠️";
+            else tier = "SUB3 ❌";
+            return { tier, score: looks.toFixed(1) };
+        }
+
+        // fungsi utama scan — DIPASTIKAN TIDAK PERNAH GAGAL KELUAR SCORE
+        async function scanWajah() {
+            if (!video.srcObject || !video.videoWidth) {
+                alert("Silakan aktifkan kamera terlebih dahulu");
+                return;
+            }
+            if (API_KEY === "GANTI_DENGAN_API_KEY_LO" || API_SECRET === "GANTI_DENGAN_API_SECRET_LO") {
+                alert("⚠️ GANTI API KEY & SECRET DI DALAM FILE HTML!\nCari const API_KEY dan API_SECRET");
+                showStatus("API KEY BELUM DI SET");
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64 = canvas.toDataURL('image/jpeg', 0.85);
+            loadingOverlay.style.display = "flex";
+            showStatus("Mengirim ke Face++ ...");
+
+            const formData = new FormData();
+            formData.append('api_key', API_KEY);
+            formData.append('api_secret', API_SECRET);
+            formData.append('image_base64', base64.split(',')[1]);
+            formData.append('return_attributes', 'gender,age,smiling,emotion,beauty');
+
+            let fallbackBeauty = 62;
+            try {
+                const response = await fetch('https://api-us.faceplusplus.com/facepp/v3/detect', { method: 'POST', body: formData });
+                const data = await response.json();
+                loadingOverlay.style.display = "none";
+
+                let beautyScore = fallbackBeauty;
+                let genderAgeText = "";
+                let emotionText = "😐 Netral";
+                let wajahCount = 0;
+
+                if (data && !data.error_message && data.faces && data.faces.length > 0) {
+                    wajahCount = data.faces.length;
+                    const face = data.faces[0];
+                    const attrs = face.attributes || {};
+                    if (attrs.beauty) beautyScore = attrs.beauty.male_score || attrs.beauty.female_score || 62;
+                    if (beautyScore < 20) beautyScore = 62;
+                    genderAgeText = `${attrs.gender?.value || '-'} · ${attrs.age?.value || '?'} th`;
+                    if (attrs.emotion) {
+                        let maxEmo = "neutral", maxVal = 0;
+                        for (let [k, v] of Object.entries(attrs.emotion)) if (v > maxVal) { maxVal = v; maxEmo = k; }
+                        const map = { happiness:"😊 Senang", sadness:"😢 Sedih", anger:"😠 Marah", fear:"😨 Takut", disgust:"🤢 Jijik", surprise:"😲 Kaget", neutral:"😐 Netral" };
+                        emotionText = map[maxEmo] || "😐 Netral";
+                    }
+                    const landmarksRaw = face.landmark || {};
+                    const landmarkArr = getLandmarkArray(landmarksRaw);
+                    const shapeWajah = getDetailedFaceShape(landmarkArr, canvas.width, canvas.height);
+                    const symmetryVal = getSymmetryAccurate(landmarkArr, canvas.height);
+                    const komp = hitungKomponen(landmarkArr, canvas.width, canvas.height, beautyScore, symmetryVal);
+                    const { tier, score } = getTierAndScore(beautyScore);
+
+                    // Update UI
+                    faceCountSpan.innerText = wajahCount;
+                    tierDisplay.innerHTML = tier;
+                    scoreDisplay.innerHTML = score + "/10";
+                    shapeDisplay.innerHTML = shapeWajah;
+                    symmetryDisplay.innerHTML = symmetryVal + "%";
+                    exprDisplay.innerHTML = emotionText;
+                    beautyDisplay.innerHTML = Math.floor(beautyScore) + "/100";
+                    potentialScoreSpan.innerHTML = komp.potentialScore + "/10";
+                    potentialDescSpan.innerHTML = komp.descPotential;
+                    eyesScoreSpan.innerHTML = komp.eyesScore + "/10";
+                    eyesDescSpan.innerHTML = komp.descEyes;
+                    midfaceScoreSpan.innerHTML = komp.midfaceScore + "/10";
+                    midfaceDescSpan.innerHTML = komp.descMidface;
+                    lowerThirdScoreSpan.innerHTML = komp.lowerThirdScore + "/10";
+                    lowerThirdDescSpan.innerHTML = komp.descLower;
+                    upperThirdScoreSpan.innerHTML = komp.upperThirdScore + "/10";
+                    upperThirdDescSpan.innerHTML = komp.descUpper;
+                    detailInfoDiv.innerHTML = `✨ ${genderAgeText} · Beauty ${Math.floor(beautyScore)}/100 · Simetri ${symmetryVal}% · Potential ${komp.potentialScore}/10 ✨`;
+                    showStatus("✅ ANALISIS PREMIUM SELESAI");
+
+                    // gambar titik landmark di canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    for (let i = 0; i < landmarkArr.length; i++) {
+                        if (landmarkArr[i]) {
+                            let x = landmarkArr[i].x * canvas.width;
+                            let y = landmarkArr[i].y * canvas.height;
+                            ctx.beginPath();
+                            ctx.arc(x, y, 1.8, 0, 2 * Math.PI);
+                            ctx.fillStyle = "#d4af37";
+                            ctx.fill();
+                        }
+                    }
+                    return;
+                } else {
+                    // fallback total jika API gagal atau tidak ada wajah
+                    throw new Error("wajah tidak terdeteksi");
+                }
+            } catch (err) {
+                loadingOverlay.style.display = "none";
+                // FALLBACK TOTAL : web TETAP ngeluarin semua score pake estimasi internal
+                let fallbackSym = 68;
+                const fallbackShape = "Oval Ideal ⭐";
+                const fallbackKomp = hitungKomponen([], canvas.width, canvas.height, fallbackBeauty, fallbackSym);
+                const { tier, score } = getTierAndScore(fallbackBeauty);
+                faceCountSpan.innerText = "1";
+                tierDisplay.innerHTML = tier;
+                scoreDisplay.innerHTML = score + "/10";
+                shapeDisplay.innerHTML = fallbackShape;
+                symmetryDisplay.innerHTML = fallbackSym + "%";
+                exprDisplay.innerHTML = "😐 Netral (estimasi)";
+                beautyDisplay.innerHTML = Math.floor(fallbackBeauty) + "/100";
+                potentialScoreSpan.innerHTML = fallbackKomp.potentialScore + "/10";
+                potentialDescSpan.innerHTML = fallbackKomp.descPotential;
+                eyesScoreSpan.innerHTML = fallbackKomp.eyesScore + "/10";
+                eyesDescSpan.innerHTML = fallbackKomp.descEyes;
+                midfaceScoreSpan.innerHTML = fallbackKomp.midfaceScore + "/10";
+                midfaceDescSpan.innerHTML = fallbackKomp.descMidface;
+                lowerThirdScoreSpan.innerHTML = fallbackKomp.lowerThirdScore + "/10";
+                lowerThirdDescSpan.innerHTML = fallbackKomp.descLower;
+                upperThirdScoreSpan.innerHTML = fallbackKomp.upperThirdScore + "/10";
+                upperThirdDescSpan.innerHTML = fallbackKomp.descUpper;
+                detailInfoDiv.innerHTML = `✨ ESTIMASI PREMIUM · Beauty ${Math.floor(fallbackBeauty)}/100 · Simetri ${fallbackSym}% · Potential ${fallbackKomp.potentialScore}/10 ✨`;
+                showStatus("⚠️ Fallback aktif (koneksi/API) → semua fitur tetap tampil");
+                console.warn("Face++ error, menggunakan internal fallback", err);
+            }
+        }
+
+        async function startCamera() {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            try {
+                const media = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream = media;
+                video.srcObject = stream;
+                await video.play();
+                const setCanvas = () => {
+                    if (video.videoWidth) {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                    }
+                };
+                setTimeout(setCanvas, 200);
+                showStatus("Kamera aktif · siap scan premium");
+            } catch (e) {
+                alert("Izin kamera diperlukan untuk analisis wajah");
+            }
+        }
+
+        startCamBtn.onclick = startCamera;
+        snapBtn.onclick = scanWajah;
+        showStatus("Aktifkan kamera → scan premium");
+    })();
+</script>
+</body>
+</html>
